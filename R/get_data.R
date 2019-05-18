@@ -3,6 +3,7 @@ pacman::p_load("fs", "readr", "feather")
 
 #----download----
 dir_create("data", "raw")
+
 temp <- tempfile()
 download.file("http://openpsychometrics.org/_rawdata/MACH_data.zip", temp)
 # alternative source:
@@ -119,7 +120,7 @@ mach_spec <- cols(
 )
 mach <- read_tsv(path("data", "raw", "MACH_data", "data.csv"),
                  col_types = mach_spec,
-                 na = c("", "NA", "NULL"))
+                 na = c("", "NA", "NULL", "N/A"))
 
 #----write----
 dir_create("data", "feather")
