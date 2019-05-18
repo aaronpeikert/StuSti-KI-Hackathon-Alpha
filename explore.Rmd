@@ -8,16 +8,14 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 if(!require("pacman"))install.packages("pacman")
-pacman::p_load("tidyverse", "fs", "knitr")
+pacman::p_load("tidyverse", "fs", "knitr", "pander")
 read_chunk(path("R","clean.R"))
 read_chunk(path("R","get_data.R"))
 
 ```
 
 ```{r spec, include=FALSE}
-
 ```
-
 
 ## Vorbereitung
 
@@ -35,19 +33,61 @@ Danach legen wir eine neue Spalte namens "psy" in mach an, die anzeigt, ob das S
 
 ## Arbeit mit den Daten
 
+Mit welchen Persönlichkeitvariablen korreliert Machiavilismus am stärksten?
+
 ```{r}
-ggplot(mach, aes(TIPI4, mach)) +
-  geom_jitter(alpha = .01) +
+select(mach, starts_with("TIPI")) %>%
+  map(cor.test, mach$mach) %>% 
+  map_dfr(broom::tidy, .id = "variable") %>% 
+  arrange(desc(statistic)) %>% 
+  pander()
+```
+
+
+```{r}
+ggplot(mach, aes(TIPI7, mach)) +
+  geom_jitter(alpha = .05) +
+  theme_minimal()
+
+ggplot(mach, aes(TIPI1, mach)) +
+  geom_jitter(alpha = .05) +
+  theme_minimal()
+
+ggplot(mach, aes(TIPI3, mach)) +
+  geom_jitter(alpha = .05) +
   theme_minimal()
 ```
+
+Ist dieser Trend unterschiedlich für Frauen, Männer, andere und unbekannt?
+
 ```{r}
-ggplot(mach, aes(TIPI5)) +
-  geom_bar() +
-  facet_wrap(~gender, scales = "free_y") +
-  scale_y_log10()
+ggplot(mach, aes(TIPI7, mach)) +
+  geom_jitter(alpha = .05) +
+  facet_wrap(~gender) +
+  geom_smooth(method = "lm") +
+  theme_minimal()
+```
+
+Wie sind die unterschiedlichsten Verteilungen von den "mach"-Items für Psychologie- vs nicht-Psychologiestudenten?
+
+```{r}
+select(mach, starts_with("Q")) %>%
+  map(as.character) %>% 
+  map(chisq.test, mach$gender) %>% 
+  map_dfr(broom::tidy, .id = "variable") %>% 
+  arrange(desc(statistic)) %>% 
+  pander()
 ```
 
 ```{r}
-mach %>% group_by(gender) %>% summarise(n = n)
+ggplot(mach, aes(Q9I)) +
+  geom_bar(aes(y = ..prop.., fill = as.factor(gender)), position = "dodge") +
+  theme_minimal()
 ```
+
+```{r}
+mach %>% group_by(gender) %>% summarise(n = n())
+```
+
+
 
