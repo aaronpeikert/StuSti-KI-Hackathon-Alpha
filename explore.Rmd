@@ -27,10 +27,27 @@ Datensätze werden in R dataframes genannt.
 ```{r read}
 ```
 
-Danach legen wir eine neue Spalte namens "psy" in mach an, die anzeigt, ob das Studienfach (die Spalte major) die Zeichenfolge "psych" enthält. 
+Danach legen wir eine neue Spalte namens "psy" in mach an, die anzeigt, ob das Studienfach (die Spalte major) die Zeichenfolge "psych" enthält, und eine Spalte "mach", die den Mittelwert relevant für mach angibt. 
 
 ```{r clean}
 ```
 
 
-## 
+## Arbeit mit den Daten
+
+```{r}
+ggplot(mach, aes(TIPI4, mach)) +
+  geom_jitter(alpha = .01) +
+  theme_minimal()
+```
+```{r}
+ggplot(mach, aes(TIPI5)) +
+  geom_bar() +
+  facet_wrap(~gender, scales = "free_y") +
+  scale_y_log10()
+```
+
+```{r}
+mach %>% group_by(gender) %>% summarise(n = n)
+```
+
