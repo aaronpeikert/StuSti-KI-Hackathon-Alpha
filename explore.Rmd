@@ -1,0 +1,36 @@
+---
+title: "Explorative Analysis"
+author: "MD"
+date: "18 5 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+if(!require("pacman"))install.packages("pacman")
+pacman::p_load("tidyverse", "fs", "knitr")
+read_chunk(path("R","clean.R"))
+read_chunk(path("R","get_data.R"))
+
+```
+
+```{r spec, include=FALSE}
+
+```
+
+
+## Vorbereitung
+
+Wir laden den Datensatz unter dem Namen "mach" ein und entfernen alle störenden Elemente.
+Datensätze werden in R dataframes genannt. 
+
+```{r read}
+```
+
+Danach legen wir eine neue Spalte namens "psy" in mach an, die anzeigt, ob das Studienfach (die Spalte major) die Zeichenfolge "psych" enthält. 
+
+```{r clean}
+```
+
+
+## 
