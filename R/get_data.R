@@ -122,7 +122,7 @@ mach_spec <- cols(
 #----read----
 mach <- read_tsv(path("data", "raw", "MACH_data", "data.csv"),
                  col_types = mach_spec,
-                 na = c("", "NA", "NULL", "N/A"))
+                 na = c("", "NA", "NULL", "N/A", "0"))
 
 #----write----
 dir_create("data", "feather")
