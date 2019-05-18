@@ -5,6 +5,8 @@ pacman::p_load("fs", "readr", "feather")
 dir_create("data", "raw")
 temp <- tempfile()
 download.file("http://openpsychometrics.org/_rawdata/MACH_data.zip", temp)
+# alternative source:
+# https://github.com/aaronpeikert/StuSti-KI-Hackathon-Alpha/releases/download/data-v1.0/MACH_data.zip
 unzip(temp, exdir = path("data", "raw"))
 
 #----read----
