@@ -10,7 +10,7 @@ download.file("http://openpsychometrics.org/_rawdata/MACH_data.zip", temp)
 # https://github.com/aaronpeikert/StuSti-KI-Hackathon-Alpha/releases/download/data-v1.0/MACH_data.zip
 unzip(temp, exdir = path("data", "raw"))
 
-#----read----
+#----spec----
 mach_spec <- cols(
   Q1A = col_integer(),
   Q1I = col_integer(),
@@ -118,6 +118,8 @@ mach_spec <- cols(
   familysize = col_integer(),
   major = col_character()
 )
+
+#----read----
 mach <- read_tsv(path("data", "raw", "MACH_data", "data.csv"),
                  col_types = mach_spec,
                  na = c("", "NA", "NULL", "N/A"))
