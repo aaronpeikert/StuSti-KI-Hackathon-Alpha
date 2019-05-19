@@ -1,0 +1,28 @@
+---
+title: "Explorative Analysis"
+author: "Aaron"
+date: "19 5 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+if(!require("pacman"))install.packages("pacman")
+pacman::p_load("tidyverse", "fs", "knitr", "pander")
+read_chunk(path("R","clean.R"))
+read_chunk(path("R","get_data.R"))
+```
+
+```{r spec, include=FALSE}
+```
+
+```{r read}
+```
+
+```{r clean, include=FALSE}
+```
+
+```{r}
+
+```
+
