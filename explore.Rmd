@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 if(!require("pacman"))install.packages("pacman")
 pacman::p_load("tidyverse", "fs", "knitr", "pander")
 read_chunk(path("R","clean.R"))
@@ -16,24 +16,137 @@ read_chunk(path("R","get_data.R"))
 ```{r spec, include=FALSE}
 ```
 
-## Vorbereitung
+## Preperation
 
-Wir laden den Datensatz unter dem Namen "mach" ein und entfernen alle störenden Elemente.
-Datensätze werden in R dataframes genannt. 
+We load the dataset (they are called `data.frame` in R), with the following code:
 
 ```{r read}
 ```
 
-Danach legen wir eine neue Spalte namens "psy" in mach an, die anzeigt, ob das Studienfach (die Spalte major) die Zeichenfolge "psych" enthält, und eine Spalte "mach", die den Mittelwert relevant für mach angibt. 
+Lets pretend for a moment that it is enough to just load the data, because cleaning data and getting it into the right shape is 80% boring and 20% weird. 
 
 ```{r clean, include=FALSE}
 ```
 
-## Arbeit mit den Daten
+We follow roughly the Book R for [Data Science (R4DS)](https://r4ds.had.co.nz) and therefore start with something more or less easy and rewarding: visualization!
 
-Mit welchen Persönlichkeitvariablen korreliert Machiavilismus am stärksten?
+![The cycle of explorative data analysis](https://d33wubrfki0l68.cloudfront.net/795c039ba2520455d833b4034befc8cf360a70ba/558a5/diagrams/data-science-explore.png)
+
+## Data visualisation
+
+The data.frame `mach` contains many intresting variables (which exactly can be found in the *codebook* under /data/raw/MACH_data/codebook.txt). One of them is `mach` (yes like the dataframe itself), which represents the average of answers to questions such as:
+
+| ID | Statement                                                                                                       |
+|----|-----------------------------------------------------------------------------------------------------------------|
+| Q1 | Never tell anyone the real reason you did something unless it is useful to do so.                               |
+| Q2 | The best way to handle people is to tell them what they want to hear.                                           |
+| Q3 | One should take action only when sure it is morally right.                                                      |
+| Q4 | Most people are basically good and kind.                                                                        |
+| Q5 | It is safest to assume that all people have a vicious streak and it will come out when they are given a chance. |
+
+They represent a construct called ["Machiavellianism"](https://en.wikipedia.org/wiki/Machiavellianism). How much they agree with 20 statements like the above, where indicated by `r nrow(mach)` people on a scale of 1-5.
+
+With such data one can answer empirical questions like:
+
+So is age related to Machiavellianism?
 
 ```{r}
+ggplot(data = sample_n(mach, 500)) + 
+  geom_point(mapping = aes(x = age, y = mach))
+```
+
+> "The greatest value of a picture is when it forces us to notice what we
+> never expected to see." --- John Tukey
+
+You can create plots with the famous `ggplot2` library in the following way:
+
+```{r, eval=FALSE}
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+```
+
+Data is the data.frame we are refering to, the geom function is the aesthetic (point for a scatter plot) and mapping descibes how the data relates do the geom. We can e.g. map the color of the points to the gender:
+
+```{r}
+# mach is simply to big so we choose randomly 500 persons
+mini_mach <- sample_n(mach, 500)
+
+ggplot(data = mini_mach) + 
+  geom_point(mapping = aes(x = age, y = mach, color = gender))
+```
+
+Or the shape:
+
+```{r}
+ggplot(data = mini_mach) + 
+  geom_point(mapping = aes(x = age, y = mach, shape = gender))
+```
+
+If you want to set instead of map an aesthetic, it needs to go outside the `aes` function:
+
+```{r}
+ggplot(data = mini_mach) + 
+  geom_point(mapping = aes(x = age, y = mach), color = "darkred")
+```
+
+There are often more then one aestheticly pleasing aesthetics:
+
+```{r}
+ggplot(data = mini_mach) + 
+  geom_bin2d(mapping = aes(x = age, y = mach))
+
+ggplot(data = mini_mach) + 
+  geom_smooth(mapping = aes(x = age, y = mach))
+```
+
+This last plot hides a lot more information but also tries to show the relation between age and mach. Combining the two may be powerfull:
+
+```{r}
+ggplot(data = mini_mach) + 
+  geom_point(mapping = aes(x = age, y = mach)) +
+  geom_smooth(mapping = aes(x = age, y = mach))
+```
+
+So you can simply add more geoms with `+`. But also other things like a generel (possibly better locking theme). I like `theme_minimal`.
+
+At the moment we have avoided overplotting by reducing the data to 500 people, but the use of the aesthetic `alpha` make more or less transparent points.
+
+```{r}
+ggplot(data = mach) + 
+  geom_point(mapping = aes(x = age, y = mach), alpha = .05) +
+  theme_minimal()
+```
+
+We still have a little problem with overplotting. The vertical stripes result from the fact that age is alway a round number, never e.g. a half. We can get rid of that with geom_jitter, with moves the points a little bit randomly around-
+
+```{r}
+ggplot(data = mach) + 
+  geom_jitter(mapping = aes(x = age, y = mach), alpha = .05) +
+  theme_minimal()
+```
+
+OK, so is this trend different for gender?
+
+```{r}
+ggplot(data = mach) + 
+  geom_jitter(mapping = aes(x = age, y = mach, color = gender), alpha = .05) +
+  theme_minimal()
+```
+
+Can you decipher what is going on with "other"-gender? I cannot. (Maybe you can solve that propblem; hint `facet_wrap` might help)
+
+```{r, include=FALSE}
+ggplot(data = mach) + 
+  geom_jitter(mapping = aes(x = age, y = mach, color = gender), alpha = .05) +
+  facet_wrap(~gender) +
+  theme_minimal()
+```
+
+Now try to build your personal intresting scatter plot?
+
+(Hint: you may want to look into TIPI7 for a strong relationship)
+
+```{r, include=FALSE}
 select(mach, starts_with("TIPI")) %>%
   map(cor.test, mach$mach) %>% 
   map_dfr(broom::tidy, .id = "variable") %>% 
@@ -42,7 +155,7 @@ select(mach, starts_with("TIPI")) %>%
   pander()
 ```
 
-```{r}
+```{r, include=FALSE}
 ggplot(mach, aes(TIPI7, mach)) +
   geom_jitter(alpha = .05) +
   theme_minimal()
@@ -56,9 +169,7 @@ ggplot(mach, aes(TIPI1, mach)) +
   theme_minimal()
 ```
 
-Ist dieser Trend unterschiedlich für Frauen, Männer, andere und unbekannt?
-
-```{r}
+```{r, include=FALSE}
 ggplot(mach, aes(TIPI7, mach)) +
   geom_jitter(alpha = .05) +
   facet_wrap(~gender) +
@@ -66,9 +177,7 @@ ggplot(mach, aes(TIPI7, mach)) +
   theme_minimal()
 ```
 
-Wie sind die unterschiedlichsten Verteilungen von den "mach"-Items für Geschlechter?
-
-```{r}
+```{r, include=FALSE}
 select(mach, starts_with("Q")) %>%
   map(as.character) %>% 
   map(chisq.test, mach$gender) %>% 
@@ -77,7 +186,7 @@ select(mach, starts_with("Q")) %>%
   pander()
 ```
 
-```{r}
+```{r, include=FALSE}
 mach %>% 
   group_by(gender, Q9I) %>% 
   summarise(n = n()) %>%
@@ -94,9 +203,4 @@ mach %>%
   ggplot(aes(Q14I, prop, fill = gender)) +
   geom_col(position = "dodge") +
   theme_minimal()
-```
-
-```{r}
-mach %>% group_by(gender) %>% summarise(n = n())
-mach %>% group_by(gender, engnat) %>% summarise(n = n())
 ```
