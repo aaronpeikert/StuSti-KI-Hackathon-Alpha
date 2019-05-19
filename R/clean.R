@@ -20,3 +20,5 @@ mach %>% mutate(major = str_to_lower(major),
 
 mach %>% mutate_at(vars(matches("^Q\\d*I$")), ~6 - .) %>%
   mutate(., mach = rowMeans(select(., starts_with("Q")))) -> mach
+
+mach %>% filter(age < 90) -> mach
