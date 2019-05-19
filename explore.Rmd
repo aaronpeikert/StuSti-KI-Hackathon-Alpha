@@ -11,7 +11,6 @@ if(!require("pacman"))install.packages("pacman")
 pacman::p_load("tidyverse", "fs", "knitr", "pander")
 read_chunk(path("R","clean.R"))
 read_chunk(path("R","get_data.R"))
-
 ```
 
 ```{r spec, include=FALSE}
@@ -27,9 +26,8 @@ Datensätze werden in R dataframes genannt.
 
 Danach legen wir eine neue Spalte namens "psy" in mach an, die anzeigt, ob das Studienfach (die Spalte major) die Zeichenfolge "psych" enthält, und eine Spalte "mach", die den Mittelwert relevant für mach angibt. 
 
-```{r clean}
+```{r clean, include=FALSE}
 ```
-
 
 ## Arbeit mit den Daten
 
@@ -39,21 +37,21 @@ Mit welchen Persönlichkeitvariablen korreliert Machiavilismus am stärksten?
 select(mach, starts_with("TIPI")) %>%
   map(cor.test, mach$mach) %>% 
   map_dfr(broom::tidy, .id = "variable") %>% 
-  arrange(desc(statistic)) %>% 
+  arrange(desc(abs(statistic))) %>% 
+  select(variable, estimate, statistic) %>% 
   pander()
 ```
-
 
 ```{r}
 ggplot(mach, aes(TIPI7, mach)) +
   geom_jitter(alpha = .05) +
   theme_minimal()
 
-ggplot(mach, aes(TIPI1, mach)) +
+ggplot(mach, aes(TIPI2, mach)) +
   geom_jitter(alpha = .05) +
   theme_minimal()
 
-ggplot(mach, aes(TIPI3, mach)) +
+ggplot(mach, aes(TIPI1, mach)) +
   geom_jitter(alpha = .05) +
   theme_minimal()
 ```
@@ -68,7 +66,7 @@ ggplot(mach, aes(TIPI7, mach)) +
   theme_minimal()
 ```
 
-Wie sind die unterschiedlichsten Verteilungen von den "mach"-Items für Psychologie- vs nicht-Psychologiestudenten?
+Wie sind die unterschiedlichsten Verteilungen von den "mach"-Items für Geschlechter?
 
 ```{r}
 select(mach, starts_with("Q")) %>%
@@ -80,14 +78,25 @@ select(mach, starts_with("Q")) %>%
 ```
 
 ```{r}
-ggplot(mach, aes(Q9I)) +
-  geom_bar(aes(y = ..prop.., fill = as.factor(gender)), position = "dodge") +
+mach %>% 
+  group_by(gender, Q9I) %>% 
+  summarise(n = n()) %>%
+  mutate(prop = n / sum(n)) %>% 
+  ggplot(aes(Q9I, prop, fill = gender)) +
+  geom_col(position = "dodge") +
+  theme_minimal()
+
+mach %>% 
+  filter(gender %in% c("m", "f")) %>% 
+  group_by(gender, Q14I) %>% 
+  summarise(n = n()) %>%
+  mutate(prop = n / sum(n)) %>% 
+  ggplot(aes(Q14I, prop, fill = gender)) +
+  geom_col(position = "dodge") +
   theme_minimal()
 ```
 
 ```{r}
 mach %>% group_by(gender) %>% summarise(n = n())
+mach %>% group_by(gender, engnat) %>% summarise(n = n())
 ```
-
-
-

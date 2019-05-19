@@ -15,5 +15,8 @@ mach %>% rename(Q3I = Q3A,
                 Q17I = Q17A) -> mach
 
 mach %>% mutate(major = str_to_lower(major), 
+                gender = recode_factor(gender, "1" = "m", "2" = "f", "3" = "o"),
                 psy = str_detect(major, "psych") %>% ifelse(is.na(.), FALSE, .)) -> mach
-mach %>% mutate_at(vars(matches("^Q\\d*I$")), ~8 - .) %>% mutate(., mach = rowMeans(select(., starts_with("Q")))) -> mach
+
+mach %>% mutate_at(vars(matches("^Q\\d*I$")), ~6 - .) %>%
+  mutate(., mach = rowMeans(select(., starts_with("Q")))) -> mach
